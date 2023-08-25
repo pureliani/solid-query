@@ -1,0 +1,33 @@
+{
+  "name": "@gapu/solid-query",
+  "version": "0.7.0",
+  "description": "Primitives for managing rest api integrations in solid.js",
+  "scripts": {
+    "build": "tsup --dts",
+    "build:watch": "tsup --dts --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pureliani/solid-query"
+  },
+  "keywords": [
+    "solid-js",
+    "solid-query",
+    "query"
+  ],
+  "author": "Gabriel Pureliani",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2"
+  },
+  "peerDependencies": {
+    "solid-js": "*"
+  },
+  "module": "./dist/index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ]
+}
