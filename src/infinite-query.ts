@@ -10,20 +10,18 @@ export type InfiniteQueryOptions<Response, Error> = {
     onFetchPageSuccess?: (e: Response) => void
     onFetchPageError?: (e: Error) => void
     onFetchPage: (page: number) => Promise<Response>
-    enabled?: () => boolean
+    lazy?: () => boolean
 }
 
 export const createInfiniteQuery = <Response, Error>(options: InfiniteQueryOptions<Response, Error>) => {
-    const enabled = () => {
-        if (options.enabled) {
-            return options.enabled();
-        }
-        return true;
+    const lazy = () => {
+        if (options.lazy) { return options.lazy(); }
+        return false;
     };
 
-    const initialPage = options.initialPage ?? !enabled() ? 0 : 1
+    const initialPage = options.initialPage ?? lazy() ? 0 : 1
 
-    const [pages, set_pages] = createSignal<Page<Response>[]>([]);
+    const [pages, setPages] = createSignal<Page<Response>[]>([]);
     const [currentPage, setCurrentPage] = createSignal(initialPage);
     const [isLoadingInitial, setIsLoadingInitial] = createSignal<boolean>(false);
     const [isLoading, setIsLoading] = createSignal<boolean>(false);
@@ -41,7 +39,7 @@ export const createInfiniteQuery = <Response, Error>(options: InfiniteQueryOptio
             options.onFetchPageSuccess?.(new_page);
 
             const as_object: Page<Response> = { data: new_page, number: n }; 
-            set_pages(current => [...current, as_object]);
+            setPages(current => [...current, as_object]);
 
             return as_object;
         } catch(e) {
@@ -61,7 +59,7 @@ export const createInfiniteQuery = <Response, Error>(options: InfiniteQueryOptio
             options.onFetchPageSuccess?.(_data);
 
             const data_object = { data: _data, number: n };
-            set_pages(prev => {
+            setPages(prev => {
                 const updated = prev.filter(p => p.number = n);
                 updated.push(data_object);
                 return updated;
@@ -74,7 +72,7 @@ export const createInfiniteQuery = <Response, Error>(options: InfiniteQueryOptio
         }
     }; 
 
-    if (enabled()) {
+    if (!lazy()) {
         setIsLoadingInitial(true);
         // eslint-disable-next-line solid/reactivity
         nth(initialPage).finally(() => {
