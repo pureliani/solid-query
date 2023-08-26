@@ -92,7 +92,10 @@ export type QueryOptions<Response, Error> = {
     // A function which is responsible for fetching data
     // it must throw on error
     queryFn: () => Promise<Response>
-    
+
+    // A key used to cache results
+    key:? () => string
+
     // A boolean indicating if the query is refetchable / initially enabled
     enabled?: () => boolean
 
