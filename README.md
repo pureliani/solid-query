@@ -25,6 +25,8 @@ type ResponseBody = {
   userId: number
 }
 
+const [todoId, setTodoId] = createSignal(1)
+
 export const { 
     data, 
     error, 
@@ -34,8 +36,9 @@ export const {
     refetch: refetch_todos, 
     clear 
 } = createQuery<ResponseBody>({
+    key: () => todoId(),
     queryFn: async () => {
-        const { data: todo } = await axios.get("https://jsonplaceholder.typicode.com/todos/1");
+        const { data: todo } = await axios.get(`https://jsonplaceholder.typicode.com/todos/${todoId()}`);
         return todo;
     }
 });

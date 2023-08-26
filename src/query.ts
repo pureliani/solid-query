@@ -3,7 +3,7 @@ import type { Accessor } from "solid-js";
 
 export type QueryOptions<Response, Error> = {
     queryFn: () => Promise<Response>
-    key?: Accessor<string>
+    key?: Accessor<string | number>
     enabled?: () => boolean
     onSuccess?: (data: Response) => void
     onError?: (error: Error) => void
