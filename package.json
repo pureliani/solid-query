@@ -1,6 +1,6 @@
 {
   "name": "@gapu/solid-query",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A simple library for api integrations with solid.js",
   "scripts": {
     "test": "test",
