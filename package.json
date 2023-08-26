@@ -5,7 +5,10 @@
   "scripts": {
     "test": "test",
     "build": "rollup -c",
-    "buildw": "rollup -c -w"
+    "buildw": "rollup -c -w",
+    "release:patch": "npm run build && npm version patch && auto-changelog -p && git add CHANGELOG.md && git commit -m \"docs: update Changelog\"",
+    "release:minor": "npm run build && npm version minor && auto-changelog -p && git add CHANGELOG.md && git commit -m \"docs: update Changelog\"",
+    "release:major": "npm run build && npm version major && auto-changelog -p && git add CHANGELOG.md && git commit -m \"docs: update Changelog\""
   },
   "repository": {
     "type": "git",
@@ -23,6 +26,7 @@
     "@rollup/plugin-terser": "^0.4.3",
     "@rollup/plugin-typescript": "^11.1.2",
     "@types/node": "^20.5.6",
+    "auto-changelog": "^2.4.0",
     "rollup": "^3.28.1",
     "typescript": "^5.2.2"
   },
