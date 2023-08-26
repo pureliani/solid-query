@@ -134,6 +134,9 @@ export type CreateQueryReturn<Response, Error> = {
 
     // Check if initial query is in progress (only true if "enabled" is initially true)
     isLoadingInitial: Accessor<boolean>
+    // If you need to manually update states
+    setData: Setter<Response | undefined>
+    setError: Setter<Error | undefined>
 }
 
 // function signature

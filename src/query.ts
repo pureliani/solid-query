@@ -1,5 +1,5 @@
 import { createComputed, createEffect, createSignal, onMount } from "solid-js";
-import type { Accessor } from "solid-js";
+import type { Accessor, Setter } from "solid-js";
 
 export type QueryOptions<Response, Error> = {
     queryFn: () => Promise<Response>
@@ -11,7 +11,9 @@ export type QueryOptions<Response, Error> = {
 
 export type CreateQueryReturn<Response, Error> = {
     data: Accessor<Response | undefined>
+    setData: Setter<Response | undefined>
     error: Accessor<Error | undefined>
+    setError: Setter<Error | undefined>
     clear: () => void
     refetch: () => Promise<Response | undefined>
     isError: Accessor<boolean>
@@ -25,14 +27,12 @@ export function createQuery<Response, Error>(options: QueryOptions<Response, Err
 
     const [data, setData] = createSignal<Response | undefined>(undefined);
     const [error, setError] = createSignal<Error | undefined>(undefined);
-    const [isError, setIsError] = createSignal<boolean>(false);
     const [isLoadingInitial, setIsLoadingInitial] = createSignal<boolean>(false);
     const [isLoading, setIsLoading] = createSignal<boolean>(false);
 
     const clear = () => {
         setError(undefined);
         setData(undefined);
-        setIsError(false);
         setIsLoadingInitial(false);
         setIsLoading(false);
     };
@@ -49,21 +49,19 @@ export function createQuery<Response, Error>(options: QueryOptions<Response, Err
 
         try {
             setIsLoading(true)
-            const _data = await options.queryFn();
-            setData(() => _data);
-            options.onSuccess?.(_data);
-            setIsError(false);
+            const __data = await options.queryFn();
+            setData(() => __data);
+            options.onSuccess?.(__data);
 
             // update cache
             if(options?.key) {
-                cache[options.key()] = _data;
+                cache[options.key()] = __data;
             }
 
-            return _data;
+            return __data;
         } catch (e) {
             setError(() => e as Error);
             options.onError?.(e as Error);
-            setIsError(true);
         } finally {
             setIsLoading(false);
         }
@@ -98,8 +96,10 @@ export function createQuery<Response, Error>(options: QueryOptions<Response, Err
         error,
         clear,
         refetch,
-        isError,
+        isError: () => typeof error() !== undefined,
         isLoading,
         isLoadingInitial,
+        setData,
+        setError
     };
 };
