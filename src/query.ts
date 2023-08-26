@@ -96,7 +96,7 @@ export function createQuery<Response, Error>(options: QueryOptions<Response, Err
         error,
         clear,
         refetch,
-        isError: () => typeof error() !== undefined,
+        isError: () => error() !== undefined,
         isLoading,
         isLoadingInitial,
         setData,
