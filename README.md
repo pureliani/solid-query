@@ -101,7 +101,7 @@ export type CreateStateReturn<Response, Error> = {
     data: Accessor<Response | undefined>
     setData: (data: Response | undefined) => void
     error: Accessor<Error | undefined>
-    setError: (data: Response | undefined) => void
+    setError: (data: Error | undefined) => void
     refetch: () => Promise<Response | undefined>
     isError: Accessor<boolean>
     isLoading: Accessor<boolean>
