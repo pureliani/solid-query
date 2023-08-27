@@ -1,54 +1,47 @@
-import { createEffect, createSignal, untrack } from "solid-js";
-import type { Accessor, Setter } from "solid-js";
+import { createSignal } from "solid-js";
+import type { Accessor } from "solid-js";
 
 export type QueryOptions<Response, Error> = {
     queryFn: () => Promise<Response>
     key: Accessor<string | number>
     enabled?: () => boolean
-    onSuccess?: (data: Response) => void
-    onError?: (error: Error) => void
+    onSuccess?: (key: string | number, data: Response) => void
+    onError?: (key: string | number, error: Error) => void
 }
 
-export type CreateQueryReturn<Response, Error> = {
+export type CreateStateReturn<Response, Error> = {
     data: Accessor<Response | undefined>
+    setData: (data: Response | undefined) => void
     error: Accessor<Error | undefined>
-    setError: Setter<Error | undefined>
+    setError: (data: Response | undefined) => void
     refetch: () => Promise<Response | undefined>
     isError: Accessor<boolean>
     isLoading: Accessor<boolean>
     isLoadingInitial: Accessor<boolean>
-    cache: Accessor<Record<string | number, Response | undefined>>
-    setCache: Setter<Record<string | number, Response | undefined>>
 }
 
-export function createQuery<Response = unknown, Error = unknown>(options: QueryOptions<Response, Error>): CreateQueryReturn<Response, Error>
-export function createQuery<Response, Error>(options: QueryOptions<Response, Error>): CreateQueryReturn<Response, Error> {
-    const [cache, setCache] = createSignal<Record<string | number, Response | undefined>>({})
+export type CreateQueryReturn<Response, Error> = CreateStateReturn<Response, Error> & {
+    cache: Record<string | number, CreateStateReturn<Response, Error>>
+}
+
+export function createQueryState<Response, Error>(options: QueryOptions<Response, Error>): CreateStateReturn<Response, Error>
+export function createQueryState<Response, Error>(options: QueryOptions<Response, Error>): CreateStateReturn<Response, Error> {
+    const [data, setData] = createSignal<Response | undefined>()
     const [error, setError] = createSignal<Error | undefined>(undefined);
     const [isLoadingInitial, setIsLoadingInitial] = createSignal<boolean>(false);
     const [isLoading, setIsLoading] = createSignal<boolean>(false);
     const isError = () => error() !== undefined
-    const data = () => cache()[options.key()]
-    let onSuccessFromCache = false
 
     const onSuccess = (data: Response) => {
+        setData(() => data)
         setError(undefined)
-        options.onSuccess?.(data);
-        if(onSuccessFromCache) return
-        setCache(current => ({
-            ...current,
-            [options.key()]: data
-        }))
-        onSuccessFromCache = false
+        options.onSuccess?.(options.key(), data);
     }
 
     const onError = (error: Error) => {
         setError(() => error)
-        options.onError?.(error)
-        setCache(current => ({
-            ...current,
-            [options.key()]: undefined
-        }))
+        setData(undefined)
+        options.onError?.(options.key(), error)
     }
 
     const enabled = () => {
@@ -64,7 +57,6 @@ export function createQuery<Response, Error>(options: QueryOptions<Response, Err
         try {
             setIsLoading(true)
             const data = await options.queryFn();
-            onSuccessFromCache = false
             onSuccess(data);
             return data;
         } catch (e) {
@@ -81,33 +73,39 @@ export function createQuery<Response, Error>(options: QueryOptions<Response, Err
         });
     }
 
-    let isFirstRun = true;
-    createEffect(() => {
-        const key = options.key();
-
-        if (isFirstRun) {
-            isFirstRun = false;
-            return;
-        }
-
-        const cached = untrack(cache)[key]
-        if (cached) {
-            onSuccessFromCache = true
-            onSuccess(cached);
-        } else {
-            refetch();
-        }
-    });
-
     return {
         data,
+        setData,
         error,
         isError,
         setError,
-        cache,
-        setCache,
         refetch,
         isLoading,
         isLoadingInitial,
+    };
+}
+
+export function createQuery<Response = unknown, Error = unknown>(options: QueryOptions<Response, Error>): CreateQueryReturn<Response, Error>
+export function createQuery<Response, Error>(options: QueryOptions<Response, Error>): CreateQueryReturn<Response, Error> {
+    const cache: Record<string | number, CreateStateReturn<Response, Error>> = {}
+
+    const getOrCreateState = (): CreateStateReturn<Response, Error> => {
+        const key = options.key();
+        if (!(key in cache)) {
+            cache[key] = createQueryState({ ...options, key: () => key});
+        }
+        return cache[key];
+    }
+
+    return {
+        data: () => getOrCreateState().data(),
+        setData: (d) => getOrCreateState().setData(d),
+        error: () => getOrCreateState().error(),
+        isError: () => getOrCreateState().isError(),
+        setError: (e) => getOrCreateState().setError(e),
+        refetch: () => getOrCreateState().refetch(),
+        isLoading: () => getOrCreateState().isLoading(),
+        isLoadingInitial: () => getOrCreateState().isLoadingInitial(),
+        cache
     };
 };

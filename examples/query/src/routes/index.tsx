@@ -1,6 +1,6 @@
 import { createQuery } from "@gapu/solid-query"
 import axios from "axios"
-import { Show, createEffect, createSignal } from "solid-js"
+import { Show, createSignal } from "solid-js"
 import { LoadingDots, LoadingScreen } from "~/components/LoadingScreen"
 import { SomethingWentWrongScreen } from "~/components/SomethingWentWrongScreen"
 
@@ -21,7 +21,6 @@ export const {
     isLoadingInitial, 
     refetch, 
     cache,
-    setCache,
     setError
 } = createQuery<QueryResponse>({
     key: () => postId(),
@@ -30,19 +29,6 @@ export const {
         return post;
     }
 });
-
-setCache(({
-    1: {
-        id: 2,
-        body: "hello",
-        title: 'world',
-        userId: 2
-    }
-}))
-
-createEffect(() => {
-    console.log(cache())
-})
 
 export default function Home() {
     const onNext = () => setPostId(current => current + 1)

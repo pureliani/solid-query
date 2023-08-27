@@ -87,7 +87,7 @@ mutate({
 ### createQuery
 
 ```ts
-import type { Accessor, Setter } from "solid-js";
+import type { Accessor } from "solid-js";
 
 export type QueryOptions<Response, Error> = {
     queryFn: () => Promise<Response>
@@ -97,17 +97,24 @@ export type QueryOptions<Response, Error> = {
     onError?: (error: Error) => void
 }
 
-export type CreateQueryReturn<Response, Error> = {
+export type CreateStateReturn<Response, Error> = {
     data: Accessor<Response | undefined>
+    setData: (data: Response | undefined) => void
     error: Accessor<Error | undefined>
-    setError: Setter<Error | undefined>
+    setError: (data: Response | undefined) => void
     refetch: () => Promise<Response | undefined>
     isError: Accessor<boolean>
     isLoading: Accessor<boolean>
     isLoadingInitial: Accessor<boolean>
-    cache: Accessor<Record<string | number, Response | undefined>>
-    setCache: Setter<Record<string | number, Response | undefined>>
 }
+
+export type CreateQueryReturn<Response, Error> = CreateStateReturn<Response, Error> & {
+    cache: Record<string | number, CreateStateReturn<Response, Error>>
+}
+
+export function createQueryState<Response, Error>(
+    options: QueryOptions<Response, Error>
+): CreateStateReturn<Response, Error>
 
 export function createQuery<Response = unknown, Error = unknown>(
     options: QueryOptions<Response, Error>
