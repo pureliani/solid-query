@@ -1,5 +1,5 @@
 {
-  "name": "@gapu/solid-query-example",
+  "name": "query-example",
   "scripts": {
     "dev": "solid-start dev",
     "build": "solid-start build",
