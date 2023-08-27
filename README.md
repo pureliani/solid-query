@@ -8,24 +8,23 @@ npm install @gapu/solid-query
 Exported functions
 - [createQuery](#createquery)
 - [createMutation](#createmutation)
-- createInfiniteQuery
 
 ## Usage
 
 ### createQuery
 ```ts
-
-import axios from "axios";
 import { createQuery } from "@gapu/solid-query"
+import { createSignal } from "solid-js"
+import axios from "axios"
 
-type ResponseBody = {
-  id: number
-  title: string
-  body: string
-  userId: number
+const [postId, setPostId] = createSignal(1)
+
+type QueryResponse = {
+    id: number
+    title: string
+    body: string
+    userId: number
 }
-
-const [todoId, setTodoId] = createSignal(1)
 
 export const { 
     data, 
@@ -33,24 +32,24 @@ export const {
     isError, 
     isLoading, 
     isLoadingInitial, 
-    refetch: refetch_todos, 
-    clear 
-} = createQuery<ResponseBody>({
-    key: () => todoId(),
+    refetch, 
+    cache,
+    setCache,
+    setError
+} = createQuery<QueryResponse>({
+    key: () => postId(),
     queryFn: async () => {
-        const { data: todo } = await axios.get(`https://jsonplaceholder.typicode.com/todos/${todoId()}`);
-        return todo;
+        const { data: post } = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId()}`);
+        return post;
     }
 });
-
 ```
 
 ### createMutation
 ```ts
-
 import axios from "axios";
 import { createMutation } from "@gapu/solid-query"
-import { refetch_todos } from "examples/createQuery"
+import { refetchPosts } from "examples/createQuery"
 
 type RequestBody = {
     title: string
@@ -71,17 +70,16 @@ export const { isLoading, mutate } = createMutation<RequestBody, ResponseBody>({
         return data;
     },
     onSuccess(_data) {
-        refetch_todos();
+        refetchPosts();
     }
 });
 
 // Mutation example
 mutate({
+    userId: 1,
     title: "Hello",
     body: "World",
-    userId: 1,
 });
-
 ```
 
 ## Type definitions
@@ -89,71 +87,40 @@ mutate({
 ### createQuery
 
 ```ts
+import type { Accessor, Setter } from "solid-js";
 
 export type QueryOptions<Response, Error> = {
-    
-    // A function which is responsible for fetching data
-    // it must throw on error
     queryFn: () => Promise<Response>
-
-    // A key used to cache results
-    key:? () => string
-
-    // A boolean indicating if the query is refetchable / initially enabled
+    key: Accessor<string | number>
     enabled?: () => boolean
-
     onSuccess?: (data: Response) => void
     onError?: (error: Error) => void
 }
 
 export type CreateQueryReturn<Response, Error> = {
-    // Latest data from an API
-    // undefined if query fails
     data: Accessor<Response | undefined>
-    
-    // Error from Latest API call
-    // undefined if APi call succeeds
     error: Accessor<Error | undefined>
-
-    // A boolean indicating if the latest query failed
-    isError: Accessor<boolean>
-
-    // Reset the query state
-    // setError(undefined)
-    // setData(undefined)
-    // setIsError(false)
-    // setIsLoadingInitial(false)
-    // setIsLoading(false)
-    clear: () => void
-
-    // Try to refetch the data
-    refetch: () => Promise<Response | undefined>
-
-    // Check if a query is in progress
-    isLoading: Accessor<boolean>
-
-    // Check if initial query is in progress (only true if "enabled" is initially true)
-    isLoadingInitial: Accessor<boolean>
-    // If you need to manually update states
-    setData: Setter<Response | undefined>
     setError: Setter<Error | undefined>
+    refetch: () => Promise<Response | undefined>
+    isError: Accessor<boolean>
+    isLoading: Accessor<boolean>
+    isLoadingInitial: Accessor<boolean>
+    cache: Accessor<Record<string | number, Response | undefined>>
+    setCache: Setter<Record<string | number, Response | undefined>>
 }
 
-// function signature
 export function createQuery<Response = unknown, Error = unknown>(
     options: QueryOptions<Response, Error>
 ): CreateQueryReturn<Response, Error>
-
 ```
 
 ### createMutation
 ```ts
+import type { Accessor } from "solid-js";
+
 export type MutationOptions<Arguments, Response, Error> = {
     onSuccess?: (data: Response) => void
     onError?: (error: Error) => void
-
-    // A function taking predefined arguments
-    // If a promise fails this function should throw an error  
     mutationFn: (args: Arguments) => Promise<Response>
 }
 
@@ -162,9 +129,7 @@ export type CreateMutationReturn<Arguments, Response> = {
     mutate: (args: Arguments) => Promise<Response | undefined>
 }
 
-// function signature
 export function createMutation<Arguments = unknown, Response = unknown, Error = unknown>(
     options: MutationOptions<Arguments, Response, Error>
 ): CreateMutationReturn<Arguments, Response>
-
 ```

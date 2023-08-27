@@ -1,6 +1,6 @@
 import { createQuery } from "@gapu/solid-query"
 import axios from "axios"
-import { Show, createSignal } from "solid-js"
+import { Show, createEffect, createSignal } from "solid-js"
 import { LoadingDots, LoadingScreen } from "~/components/LoadingScreen"
 import { SomethingWentWrongScreen } from "~/components/SomethingWentWrongScreen"
 
@@ -20,8 +20,8 @@ export const {
     isLoading, 
     isLoadingInitial, 
     refetch, 
-    clear,
-    setData,
+    cache,
+    setCache,
     setError
 } = createQuery<QueryResponse>({
     key: () => postId(),
@@ -31,12 +31,25 @@ export const {
     }
 });
 
+setCache(({
+    1: {
+        id: 2,
+        body: "hello",
+        title: 'world',
+        userId: 2
+    }
+}))
+
+createEffect(() => {
+    console.log(cache())
+})
+
 export default function Home() {
     const onNext = () => setPostId(current => current + 1)
     const onPrev = () => setPostId(current => current - 1)
 
     return (
-    <div class='max-w-md mx-auto'>
+    <div class='max-w-md mx-auto mt-8'>
         <Show when={isLoadingInitial()}>
             <LoadingScreen />
         </Show>
@@ -44,7 +57,7 @@ export default function Home() {
             <SomethingWentWrongScreen />
         </Show>
         <Show when={!isLoadingInitial() && !isError()}>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 border shadow p-3 mb-4">
                 <h2 class="text-xl text-gray-500">Post #{postId()}</h2>
                 <button class="px-6 py-2 border rounded hover:bg-gray-200" onClick={onPrev}>Prev</button>
                 <button class="px-6 py-2 border rounded hover:bg-gray-200" onClick={onNext}>Next</button>
