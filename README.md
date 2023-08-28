@@ -12,8 +12,7 @@ Exported functions
 ## Usage
 
 > **Warning**  
-> Do not consume signals directly in the queryFn, instead take key as an argument as shown in the example
- 
+> Do not consume a signal of a key directly in the queryFn, instead take the key as an argument as shown in the example
 
 ### createQuery
 ```ts
@@ -39,6 +38,9 @@ export const {
 } = createQuery<QueryResponse>({
     key: () => postId(),
     queryFn: async (key) => {
+        // This would be invalid, note how we are reading "postId()" instead of "key"
+        // const { data: post } = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId()}`);
+
         const { data: post } = await axios.get(`https://jsonplaceholder.typicode.com/posts/${key}`);
         return post;
     }
