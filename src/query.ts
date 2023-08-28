@@ -1,111 +1,117 @@
-import { createSignal } from "solid-js";
-import type { Accessor } from "solid-js";
+import { batch, createEffect, createSignal } from "solid-js";
+import type { Accessor, Setter } from "solid-js";
+
+export type Key = string | number
 
 export type QueryOptions<Response, Error> = {
-    queryFn: () => Promise<Response>
-    key: Accessor<string | number>
+    queryFn: (key: Key) => Promise<Response>
+    key: Accessor<Key>
     enabled?: () => boolean
-    onSuccess?: (key: string | number, data: Response) => void
-    onError?: (key: string | number, error: Error) => void
+    onSuccess?: (key: Key, data: Response) => void
+    onError?: (key: Key, error: Error) => void
 }
 
-export type CreateStateReturn<Response, Error> = {
+export type QueryState<Response, Error> = {
+    data: Response | undefined
+    error: Error | undefined
+    isLoading: boolean
+    isLoadingInitial: boolean
+}
+
+export type CreateQueryReturn<Response, Error> = {
     data: Accessor<Response | undefined>
-    setData: (data: Response | undefined) => void
     error: Accessor<Error | undefined>
-    setError: (error: Error | undefined) => void
-    refetch: () => Promise<Response | undefined>
     isError: Accessor<boolean>
     isLoading: Accessor<boolean>
     isLoadingInitial: Accessor<boolean>
+    setError: (error: Error, key?: Key) => void
+    setData: (data: Response, key?: Key) => void
+    refetch: (key?: Key) => Promise<Response | undefined>
+    cache: Accessor<Record<Key, QueryState<Response | undefined, Error>>>
+    setCache: Setter<Record<Key, QueryState<Response | undefined, Error>>>
 }
 
-export type CreateQueryReturn<Response, Error> = CreateStateReturn<Response, Error> & {
-    cache: Record<string | number, CreateStateReturn<Response, Error>>
-}
-
-export function createQueryState<Response, Error>(options: QueryOptions<Response, Error>): CreateStateReturn<Response, Error>
-export function createQueryState<Response, Error>(options: QueryOptions<Response, Error>): CreateStateReturn<Response, Error> {
-    const [data, setData] = createSignal<Response | undefined>()
-    const [error, setError] = createSignal<Error | undefined>(undefined);
-    const [isLoadingInitial, setIsLoadingInitial] = createSignal<boolean>(false);
-    const [isLoading, setIsLoading] = createSignal<boolean>(false);
-    const isError = () => error() !== undefined
-
-    const onSuccess = (data: Response) => {
-        setData(() => data)
-        setError(undefined)
-        options.onSuccess?.(options.key(), data);
-    }
-
-    const onError = (error: Error) => {
-        setError(() => error)
-        setData(undefined)
-        options.onError?.(options.key(), error)
-    }
+export function createQuery<Response = unknown, Error = unknown>(
+    options: QueryOptions<Response, Error>
+): CreateQueryReturn<Response, Error>
+export function createQuery<Response, Error>(
+    options: QueryOptions<Response, Error>
+): CreateQueryReturn<Response, Error> {
+    const [cache, setCache] = createSignal<Record<Key, QueryState<Response | undefined, Error>>>({});
 
     const enabled = () => {
-        if (options.enabled) {
-            return options.enabled();
-        }
-        return true;
-    };
+        if(!options.enabled) return true
+        return options.enabled()
+    }
 
-    const refetch = async (): Promise<Response | undefined> => {
+    const setField = <
+    QS extends QueryState<Response, Error>, 
+    F extends keyof QS>(key: Key, field: F, val: QS[F]) => {
+        setCache((current) => ({
+            ...current,
+            [key]: {
+                ...current[key],
+                [field]: val
+            }
+        }))
+    }
+
+    const setData = (data: Response, key?: Key) => {
+        const _key = key ?? options.key()
+        batch(() => {
+            setField(_key, "data", data)
+            setField(_key, "error", undefined)
+        })
+    }
+
+    const setError = (error: Error, key?: Key) => {
+        const _key = key ?? options.key()
+        batch(() => {
+            setField(_key, "data", undefined)
+            setField(_key, "error", error)
+        })
+    }
+
+    const refetch = async (key?: Key): Promise<Response | undefined> => {
+        const _key = key || options.key()
         if(!enabled()) return;
 
         try {
-            setIsLoading(true)
-            const data = await options.queryFn();
-            onSuccess(data);
+            setField(_key, "isLoading", true)
+            const data = await options.queryFn(_key);
+            setData(data, key);
             return data;
         } catch (e) {
-            onError(e as Error);
+            setError(e as Error, key);
         } finally {
-            setIsLoading(false);
+            batch(() => {
+                setField(_key, "isLoading", false)
+                setField(_key, "isLoadingInitial", false)
+            })
         }
-    };
-
-    if (enabled()) {
-        setIsLoadingInitial(true);
-        refetch().finally(() => {
-            setIsLoadingInitial(false);
-        });
     }
 
+    if(enabled()) {
+        setField(options.key(), "isLoadingInitial", true)
+        refetch(options.key())
+    }
+
+    createEffect(() => {
+        if(!(options.key() in cache())) {
+            refetch(options.key())
+        }
+    })
+
     return {
-        data,
+        data: () => cache()[options.key()]?.data ?? undefined,
         setData,
-        error,
-        isError,
+        error: () => cache()[options.key()]?.error ?? undefined,
+        isError: () => cache()[options.key()]?.error !== undefined,
         setError,
         refetch,
-        isLoading,
-        isLoadingInitial,
-    };
-}
-
-export function createQuery<Response = unknown, Error = unknown>(options: QueryOptions<Response, Error>): CreateQueryReturn<Response, Error>
-export function createQuery<Response, Error>(options: QueryOptions<Response, Error>): CreateQueryReturn<Response, Error> {
-    const cache: Record<string | number, CreateStateReturn<Response, Error>> = {}
-
-    const getOrCreateState = (): CreateStateReturn<Response, Error> => {
-        const key = options.key();
-        if (!(key in cache)) {
-            cache[key] = createQueryState({ ...options, key: () => key});
-        }
-        return cache[key];
-    }
-
-    return {
-        data: () => getOrCreateState().data(),
-        setData: (d) => getOrCreateState().setData(d),
-        error: () => getOrCreateState().error(),
-        isError: () => getOrCreateState().isError(),
-        setError: (e) => getOrCreateState().setError(e),
-        refetch: () => getOrCreateState().refetch(),
-        isLoading: () => getOrCreateState().isLoading(),
-        isLoadingInitial: () => getOrCreateState().isLoadingInitial(),
-        cache
+        isLoading: () => cache()[options.key()]?.isLoading ?? false,
+        isLoadingInitial: () => cache()[options.key()]?.isLoadingInitial ?? false,
+        cache,
+        setCache
     };
 };
