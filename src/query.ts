@@ -56,37 +56,34 @@ export function createQuery<Response, Error>(
         }))
     }
 
-    const setData = (data: Response, key?: Key) => {
-        const _key = key ?? options.key()
+    const setData = (data: Response, key = options.key()) => {
         batch(() => {
-            setField(_key, "data", data)
-            setField(_key, "error", undefined)
+            setField(key, "data", data)
+            setField(key, "error", undefined)
         })
     }
 
-    const setError = (error: Error, key?: Key) => {
-        const _key = key ?? options.key()
+    const setError = (error: Error, key = options.key()) => {
         batch(() => {
-            setField(_key, "data", undefined)
-            setField(_key, "error", error)
+            setField(key, "data", undefined)
+            setField(key, "error", error)
         })
     }
 
-    const refetch = async (key?: Key): Promise<Response | undefined> => {
-        const _key = key || options.key()
+    const refetch = async (key = options.key()): Promise<Response | undefined> => {
         if(!enabled()) return;
 
         try {
-            setField(_key, "isLoading", true)
-            const data = await options.queryFn(_key);
+            setField(key, "isLoading", true)
+            const data = await options.queryFn(key);
             setData(data, key);
             return data;
         } catch (e) {
             setError(e as Error, key);
         } finally {
             batch(() => {
-                setField(_key, "isLoading", false)
-                setField(_key, "isLoadingInitial", false)
+                setField(key, "isLoading", false)
+                setField(key, "isLoadingInitial", false)
             })
         }
     }
