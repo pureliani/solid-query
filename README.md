@@ -35,13 +35,13 @@ export const {
     cache,
     setCache,
     setError
-} = createQuery<QueryResponse>({
+} = createQuery({
     key: () => postId(),
     queryFn: async (key) => {
-        // This would be invalid, note how we are reading "postId()" instead of "key"
+        // Do not read key signals directly, the following usage is invalid:
         // const { data: post } = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId()}`);
 
-        const { data: post } = await axios.get(`https://jsonplaceholder.typicode.com/posts/${key}`);
+        const { data: post } = await axios.get<QueryResponse>(`https://jsonplaceholder.typicode.com/posts/${key}`);
         return post;
     }
 });
@@ -89,11 +89,7 @@ mutate({
 ### createQuery
 
 ```ts
-import type { Accessor, Setter } from "solid-js";
-
-export type Key = string | number
-
-export type QueryOptions<Response, Error> = {
+export type QueryOptions<Response, Error, Key extends string | number> = {
     queryFn: (key: Key) => Promise<Response>
     key: Accessor<Key>
     enabled?: () => boolean
@@ -108,7 +104,7 @@ export type QueryState<Response, Error> = {
     isLoadingInitial: boolean
 }
 
-export type CreateQueryReturn<Response, Error> = {
+export type CreateQueryReturn<Response, Error, Key extends string | number> = {
     data: Accessor<Response | undefined>
     error: Accessor<Error | undefined>
     isError: Accessor<boolean>
@@ -121,9 +117,9 @@ export type CreateQueryReturn<Response, Error> = {
     setCache: Setter<Record<Key, QueryState<Response | undefined, Error>>>
 }
 
-export function createQuery<Response = unknown, Error = unknown>(
-    options: QueryOptions<Response, Error>
-): CreateQueryReturn<Response, Error>
+export function createQuery<Response, Error, Key extends string | number>(
+    options: QueryOptions<Response, Error, Key>
+): CreateQueryReturn<Response, Error, Key>
 ```
 
 ### createMutation

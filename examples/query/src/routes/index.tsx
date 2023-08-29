@@ -1,6 +1,6 @@
 import { createQuery } from "@gapu/solid-query"
 import axios from "axios"
-import { Show, createEffect, createSignal } from "solid-js"
+import { Show, createSignal } from "solid-js"
 import { LoadingDots, LoadingScreen } from "~/components/LoadingScreen"
 import { SomethingWentWrongScreen } from "~/components/SomethingWentWrongScreen"
 
@@ -23,10 +23,10 @@ export const {
     cache,
     setCache,
     setError
-} = createQuery<QueryResponse>({
+} = createQuery({
     key: () => postId(),
     queryFn: async (key) => {
-        const { data: post } = await axios.get(`https://jsonplaceholder.typicode.com/posts/${key}`);
+        const { data: post } = await axios.get<QueryResponse>(`https://jsonplaceholder.typicode.com/posts/${key}`);
         return post;
     }
 });
