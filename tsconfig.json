@@ -7,7 +7,7 @@
     "jsx": "preserve",            // For React projects, otherwise omit
     "declaration": true,       // Output .d.ts declaration files
     "emitDeclarationOnly": true,
-    "outDir": "./dist",        // Output directory
+    "outDir": "./dist/types",        // Output directory
     "rootDir": "./src",        // Source directory
     "removeComments": true,    // Remove comments in the output
     "esModuleInterop": true,   // Enables CommonJS/AMD module interoperability

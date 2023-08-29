@@ -5,10 +5,7 @@
   "scripts": {
     "test": "test",
     "build": "rollup -c",
-    "buildw": "rollup -c -w",
-    "release:patch": "npm run build && npm version patch && auto-changelog -p && git add CHANGELOG.md && git commit -m \"docs: update Changelog\"",
-    "release:minor": "npm run build && npm version minor && auto-changelog -p && git add CHANGELOG.md && git commit -m \"docs: update Changelog\"",
-    "release:major": "npm run build && npm version major && auto-changelog -p && git add CHANGELOG.md && git commit -m \"docs: update Changelog\""
+    "buildw": "rollup -c -w"
   },
   "repository": {
     "type": "git",
@@ -33,11 +30,8 @@
   "peerDependencies": {
     "solid-js": "*"
   },
-  "main": "./dist/index.js",
   "module": "./dist/index.js",
   "type": "module",
-  "types": "dist/index.d.ts",
-  "files": [
-    "/dist"
-  ]
+  "types": "dist/types/index.d.ts",
+  "files": ["/dist"]
 }
