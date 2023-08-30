@@ -8,6 +8,7 @@ npm install @gapu/solid-query
 Exported functions
 - [createQuery](#createquery)
 - [createMutation](#createmutation)
+- [broadcastQuery](#broadcastquery)
 
 ## Usage
 
@@ -82,6 +83,37 @@ mutate({
     title: "Hello",
     body: "World",
 });
+```
+
+### broadcastQuery
+```ts
+import { createQuery, broadcastQuery } from "@gapu/solid-query"
+import axios from "axios"
+import { Show, createSignal } from "solid-js"
+import { LoadingDots, LoadingScreen } from "~/components/LoadingScreen"
+import { SomethingWentWrongScreen } from "~/components/SomethingWentWrongScreen"
+
+type QueryResponse = {
+    id: number
+    title: string
+    body: string
+    userId: number
+}
+const [postId, setPostId] = createSignal(1)
+
+export const { cache, setCache } = createQuery({
+    key: () => postId(),
+    queryFn: async (key) => {
+        const { data: post } = await axios.get<QueryResponse>(`https://jsonplaceholder.typicode.com/posts/${key}`);
+        return post;
+    }
+});
+
+broadcastQuery({
+    cache,
+    setCache,
+    channel: 'posts-query-channel',
+})
 ```
 
 ## Type definitions

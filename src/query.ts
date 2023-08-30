@@ -1,4 +1,4 @@
-import { batch, createEffect, createSignal } from "solid-js";
+import { batch, createEffect, createRoot, createSignal } from "solid-js";
 import type { Accessor, Setter } from "solid-js";
 
 export type QueryOptions<Response, Error, Key extends string | number> = {
@@ -91,10 +91,12 @@ export function createQuery<Response, Error, Key extends string | number>(
         refetch(options.key())
     }
 
-    createEffect(() => {
-        if(!(options.key() in cache())) {
-            refetch(options.key())
-        }
+    createRoot(() => {
+        createEffect(() => {
+            if(!(options.key() in cache())) {
+                refetch(options.key())
+            }
+        })
     })
 
     return {

@@ -1,4 +1,4 @@
-import { createQuery } from "@gapu/solid-query"
+import { createQuery, broadcastQuery } from "@gapu/solid-query"
 import axios from "axios"
 import { Show, createSignal } from "solid-js"
 import { LoadingDots, LoadingScreen } from "~/components/LoadingScreen"
@@ -30,6 +30,12 @@ export const {
         return post;
     }
 });
+
+broadcastQuery({
+    cache,
+    setCache,
+    channel: 'posts-query-channel',
+})
 
 export default function Home() {
     const onNext = () => setPostId(current => current + 1)
