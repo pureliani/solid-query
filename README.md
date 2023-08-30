@@ -89,9 +89,7 @@ mutate({
 ```ts
 import { createQuery, broadcastQuery } from "@gapu/solid-query"
 import axios from "axios"
-import { Show, createSignal } from "solid-js"
-import { LoadingDots, LoadingScreen } from "~/components/LoadingScreen"
-import { SomethingWentWrongScreen } from "~/components/SomethingWentWrongScreen"
+import { createSignal } from "solid-js"
 
 type QueryResponse = {
     id: number
@@ -172,4 +170,26 @@ export type CreateMutationReturn<Arguments, Response> = {
 export function createMutation<Arguments = unknown, Response = unknown, Error = unknown>(
     options: MutationOptions<Arguments, Response, Error>
 ): CreateMutationReturn<Arguments, Response>
+```
+
+### broadcastQuery
+```ts
+import type { Accessor, Setter } from "solid-js";
+import { QueryState } from "./query";
+
+export type BroadcastQueryProps<Response, Error, Key extends string | number> = {
+    channel: string;
+    initialize?: boolean;
+    cache: Accessor<Record<Key, QueryState<Response | undefined, Error>>>;
+    setCache: Setter<Record<Key, QueryState<Response | undefined, Error>>>;
+};
+
+export type BroadcastQueryMessage<Response, Error, Key extends string | number> = {
+    type: "SET";
+    value: Record<Key, QueryState<Response | undefined, Error>>;
+} | {
+    type: "GET";
+};
+
+export declare function broadcastQuery<Response, Error, Key extends string | number>(props: BroadcastQueryProps<Response, Error, Key>): void;
 ```

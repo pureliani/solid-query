@@ -1,4 +1,5 @@
-import { Accessor, Setter, createEffect, createRoot } from "solid-js"
+import { createEffect, createRoot } from "solid-js"
+import type { Accessor, Setter } from "solid-js"
 import { QueryState } from "./query"
 
 export type BroadcastQueryProps<Response, Error, Key extends string | number> = {
