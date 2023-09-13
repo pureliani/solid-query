@@ -1,4 +1,7 @@
 ## A simple library for api integrations with solid.js
+![npm (scoped)](https://img.shields.io/npm/v/%40gapu/solid-query)
+![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40gapu/solid-query)
+![NPM](https://img.shields.io/npm/l/%40gapu%2Fsolid-query)
 
 Install
 ```bash
@@ -10,7 +13,9 @@ Exported functions
 - [createMutation](#createmutation)
 - [broadcastQuery](#broadcastquery)
 
+
 ## Usage
+#### [Checkout the demo](https://stackblitz.com/edit/gapu-solid-query?file=src%2FApp.tsx)
 
 > **Warning**  
 > Do not consume a signal of a key directly in the queryFn, instead take the key as an argument as shown in the example
