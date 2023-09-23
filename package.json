@@ -1,7 +1,7 @@
 {
   "name": "@gapu/solid-query",
   "version": "0.4.0",
-  "description": "A simple library for api integrations with solid.js",
+  "description": "Primitives for managing Rest Api integrations in Solid.js",
   "scripts": {
     "test": "test",
     "build": "rollup -c",
