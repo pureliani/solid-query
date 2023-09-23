@@ -1,6 +1,6 @@
 {
   "name": "@gapu/solid-query",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Primitives for managing Rest Api integrations in Solid.js",
   "scripts": {
     "test": "test",
