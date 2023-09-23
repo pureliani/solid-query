@@ -1,4 +1,4 @@
-## A simple library for api integrations with solid.js
+## Primitives for managing Rest Api integrations in Solid.js
 ![npm (scoped)](https://img.shields.io/npm/v/%40gapu/solid-query)
 ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40gapu/solid-query)
 ![NPM](https://img.shields.io/npm/l/%40gapu%2Fsolid-query)
