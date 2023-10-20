@@ -1,7 +1,7 @@
 ## Primitives for managing rest api integrations in solid.js
-![npm (scoped)](https://img.shields.io/npm/v/%40gapu/solid-query)
-![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40gapu/solid-query)
-![NPM](https://img.shields.io/npm/l/%40gapu%2Fsolid-query)
+[![npm (scoped)](https://img.shields.io/npm/v/%40gapu/solid-query)](https://www.npmjs.com/package/@gapu/solid-query)
+[![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40gapu/solid-query)](https://bundlephobia.com/package/@gapu/solid-query)
+[![NPM](https://img.shields.io/npm/l/%40gapu%2Fsolid-query)](https://www.npmjs.com/package/@gapu/solid-query)
 
 Install
 ```bash
@@ -57,7 +57,7 @@ export const {
 ```ts
 import axios from "axios";
 import { createMutation } from "@gapu/solid-query"
-import { refetchPosts } from "examples/createQuery"
+import { refetch } from "examples/createQuery"
 
 type RequestBody = {
     title: string
@@ -77,8 +77,8 @@ export const { isLoading, mutate } = createMutation<RequestBody, ResponseBody>({
         const { data } = await axios.post("https://jsonplaceholder.typicode.com/posts", body);
         return data;
     },
-    onSuccess(_data) {
-        refetchPosts();
+    onSuccess(data) {
+        refetch();
     }
 });
 
@@ -91,6 +91,7 @@ mutate({
 ```
 
 ### broadcastQuery
+Used to share query cache to other browser instances via [BroadcastChannel - Web API](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel) to avoid refetching data if the other tabs / windows already have that query cache entry
 ```ts
 import { createQuery, broadcastQuery } from "@gapu/solid-query"
 import axios from "axios"
@@ -122,7 +123,6 @@ broadcastQuery({
 ## Type definitions
 
 ### createQuery
-
 ```ts
 export type QueryOptions<Response, Error, Key extends string | number> = {
     queryFn: (key: Key) => Promise<Response>
@@ -196,5 +196,7 @@ export type BroadcastQueryMessage<Response, Error, Key extends string | number> 
     type: "GET";
 };
 
-export declare function broadcastQuery<Response, Error, Key extends string | number>(props: BroadcastQueryProps<Response, Error, Key>): void;
+export declare function broadcastQuery<Response, Error, Key extends string | number>(
+    props: BroadcastQueryProps<Response, Error, Key>
+): void;
 ```
