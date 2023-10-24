@@ -10,8 +10,12 @@ export type CreateMutationReturn<Arguments, Response> = {
     isLoading: Accessor<boolean>,
     mutate: (args: Arguments) => Promise<Response | undefined>
 }
-export function createMutation<Arguments = unknown, Response = unknown, Error = unknown>(options: MutationOptions<Arguments, Response, Error>): CreateMutationReturn<Arguments, Response>
-export function createMutation<Arguments, Response, Error>(options: MutationOptions<Arguments, Response, Error>): CreateMutationReturn<Arguments, Response> {
+export function createMutation<Arguments = unknown, Response = unknown, Error = unknown>(
+    options: MutationOptions<Arguments, Response, Error>
+): CreateMutationReturn<Arguments, Response>
+export function createMutation<Arguments, Response, Error>(
+    options: MutationOptions<Arguments, Response, Error>
+): CreateMutationReturn<Arguments, Response> {
     const [isLoading, setIsLoading] = createSignal<boolean>(false);
 
     const mutate = async (args: Arguments): Promise<Response | undefined> => {
