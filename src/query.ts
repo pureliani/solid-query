@@ -36,6 +36,7 @@ export function createQuery<Response, Error, Key extends string | number>(
     options: QueryOptions<Response, Error, Key>
 ): CreateQueryReturn<Response, Error, Key> {
     const [cache, setCache] = createSignal<Record<Key, QueryState<Response | undefined, Error>>>({} as any);
+    let hasLoadedInitialData = false
 
     const enabled = () => {
         if(!options.enabled) return true
@@ -70,15 +71,20 @@ export function createQuery<Response, Error, Key extends string | number>(
 
     const refetch = async (key = options.key()): Promise<Response | undefined> => {
         if(!enabled()) return;
-
         try {
-            setField(key, "isLoading", true)
+            batch(() => {
+                if(!hasLoadedInitialData) {
+                    setField(key, "isLoadingInitial", true)
+                }
+                setField(key, "isLoading", true)
+            })
             const data = await options.queryFn(key);
             setData(data, key);
             return data;
         } catch (e) {
             setError(e as Error, key);
         } finally {
+            hasLoadedInitialData = true
             batch(() => {
                 setField(key, "isLoading", false)
                 setField(key, "isLoadingInitial", false)
@@ -87,7 +93,6 @@ export function createQuery<Response, Error, Key extends string | number>(
     }
 
     if(enabled()) {
-        setField(options.key(), "isLoadingInitial", true)
         refetch(options.key())
     }
 
