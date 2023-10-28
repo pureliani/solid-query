@@ -1,19 +1,20 @@
-import { Accessor, createSignal } from "solid-js";
+import { createSignal, type Accessor } from "solid-js";
 
-export type MutationOptions<Arguments, Response, Error> = {
+export type MutationOptions<Arguments = any, Response = any, Error = any> = {
     onSuccess?: (data: Response) => void
     onError?: (error: Error) => void
     mutationFn: (args: Arguments) => Promise<Response>
 }
 
-export type CreateMutationReturn<Arguments, Response> = {
+export type CreateMutationReturn<Arguments = any, Response = any> = {
     isLoading: Accessor<boolean>,
     mutate: (args: Arguments) => Promise<Response | undefined>
 }
-export function createMutation<Arguments = unknown, Response = unknown, Error = unknown>(
+
+export function createMutation<Arguments = any, Response = any, Error = any>(
     options: MutationOptions<Arguments, Response, Error>
 ): CreateMutationReturn<Arguments, Response>
-export function createMutation<Arguments, Response, Error>(
+export function createMutation<Arguments = any, Response = any, Error = any>(
     options: MutationOptions<Arguments, Response, Error>
 ): CreateMutationReturn<Arguments, Response> {
     const [isLoading, setIsLoading] = createSignal<boolean>(false);

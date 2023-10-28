@@ -1,26 +1,25 @@
 import { createEffect, createRoot } from "solid-js"
 import type { Accessor, Setter } from "solid-js"
-import { QueryState } from "./query"
+import type { QueryState } from "./query"
 
-export type BroadcastQueryProps<Response, Error, Key extends string | number> = {
+export type BroadcastQueryProps<Response = any, Error = any, Key extends string | number = string | number> = {
     channel: string
     initialize?: boolean
     cache: Accessor<Record<Key, QueryState<Response | undefined, Error>>>
     setCache: Setter<Record<Key, QueryState<Response | undefined, Error>>>
 }
 
-export type BroadcastQueryMessage<Response, Error, Key extends string | number> = {
+export type BroadcastQueryMessage<Response = any, Error = any, Key extends string | number = string | number> = {
     type: "SET"
     value: Record<Key, QueryState<Response | undefined, Error>>
 } | {
     type: "GET"
 }
 
-export function broadcastQuery<Response, Error, Key extends string | number>(
+export function broadcastQuery<Response = any, Error = any, Key extends string | number = string | number>(
     props: BroadcastQueryProps<Response, Error, Key>
 ): void
-
-export function broadcastQuery<Response, Error, Key extends string | number>(
+export function broadcastQuery<Response = any, Error = any, Key extends string | number = string | number>(
     props: BroadcastQueryProps<Response, Error, Key>
 ): void {
     props.initialize ??= true

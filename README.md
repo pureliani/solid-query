@@ -124,7 +124,7 @@ broadcastQuery({
 
 ### createQuery
 ```ts
-export type QueryOptions<Response, Error, Key extends string | number> = {
+export type QueryOptions<Response = any, Error = any, Key extends string | number = string | number> = {
     queryFn: (key: Key) => Promise<Response>
     key: Accessor<Key>
     enabled?: () => boolean
@@ -132,14 +132,14 @@ export type QueryOptions<Response, Error, Key extends string | number> = {
     onError?: (key: Key, error: Error) => void
 }
 
-export type QueryState<Response, Error> = {
+export type QueryState<Response = any, Error = any> = {
     data: Response | undefined
     error: Error | undefined
     isLoading: boolean
     isLoadingInitial: boolean
 }
 
-export type CreateQueryReturn<Response, Error, Key extends string | number> = {
+export type CreateQueryReturn<Response = any, Error = any, Key extends string | number = string | number> = {
     data: Accessor<Response | undefined>
     error: Accessor<Error | undefined>
     isError: Accessor<boolean>
@@ -152,51 +152,48 @@ export type CreateQueryReturn<Response, Error, Key extends string | number> = {
     setCache: Setter<Record<Key, QueryState<Response | undefined, Error>>>
 }
 
-export function createQuery<Response, Error, Key extends string | number>(
+export function createQuery<Response = any, Error = any, Key extends string | number = string | number>(
     options: QueryOptions<Response, Error, Key>
 ): CreateQueryReturn<Response, Error, Key>
 ```
 
 ### createMutation
 ```ts
-import type { Accessor } from "solid-js";
-
-export type MutationOptions<Arguments, Response, Error> = {
+export type MutationOptions<Arguments = any, Response = any, Error = any> = {
     onSuccess?: (data: Response) => void
     onError?: (error: Error) => void
     mutationFn: (args: Arguments) => Promise<Response>
 }
 
-export type CreateMutationReturn<Arguments, Response> = {
+export type CreateMutationReturn<Arguments = any, Response = any> = {
     isLoading: Accessor<boolean>,
     mutate: (args: Arguments) => Promise<Response | undefined>
 }
 
-export function createMutation<Arguments = unknown, Response = unknown, Error = unknown>(
+export function createMutation<Arguments = any, Response = any, Error = any>(
     options: MutationOptions<Arguments, Response, Error>
 ): CreateMutationReturn<Arguments, Response>
 ```
 
 ### broadcastQuery
 ```ts
-import type { Accessor, Setter } from "solid-js";
-import { QueryState } from "./query";
+import type { QueryState } from "./query"
 
-export type BroadcastQueryProps<Response, Error, Key extends string | number> = {
+export type BroadcastQueryProps<Response = any, Error = any, Key extends string | number = string | number> = {
     channel: string;
     initialize?: boolean;
     cache: Accessor<Record<Key, QueryState<Response | undefined, Error>>>;
     setCache: Setter<Record<Key, QueryState<Response | undefined, Error>>>;
 };
 
-export type BroadcastQueryMessage<Response, Error, Key extends string | number> = {
+export type BroadcastQueryMessage<Response = any, Error = any, Key extends string | number = string | number> = {
     type: "SET";
     value: Record<Key, QueryState<Response | undefined, Error>>;
 } | {
     type: "GET";
 };
 
-export declare function broadcastQuery<Response, Error, Key extends string | number>(
+export function broadcastQuery<Response = any, Error = any, Key extends string | number = string | number>(
     props: BroadcastQueryProps<Response, Error, Key>
 ): void;
 ```

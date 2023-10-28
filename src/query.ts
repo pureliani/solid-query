@@ -1,7 +1,6 @@
-import { batch, createEffect, createRoot, createSignal } from "solid-js";
-import type { Accessor, Setter } from "solid-js";
+import { batch, createEffect, createRoot, createSignal, type Accessor, type Setter } from "solid-js";
 
-export type QueryOptions<Response, Error, Key extends string | number> = {
+export type QueryOptions<Response = any, Error = any, Key extends string | number = string | number> = {
     queryFn: (key: Key) => Promise<Response>
     key: Accessor<Key>
     enabled?: () => boolean
@@ -9,14 +8,14 @@ export type QueryOptions<Response, Error, Key extends string | number> = {
     onError?: (key: Key, error: Error) => void
 }
 
-export type QueryState<Response, Error> = {
+export type QueryState<Response = any, Error = any> = {
     data: Response | undefined
     error: Error | undefined
     isLoading: boolean
     isLoadingInitial: boolean
 }
 
-export type CreateQueryReturn<Response, Error, Key extends string | number> = {
+export type CreateQueryReturn<Response = any, Error = any, Key extends string | number = string | number> = {
     data: Accessor<Response | undefined>
     error: Accessor<Error | undefined>
     isError: Accessor<boolean>
@@ -29,10 +28,10 @@ export type CreateQueryReturn<Response, Error, Key extends string | number> = {
     setCache: Setter<Record<Key, QueryState<Response | undefined, Error>>>
 }
 
-export function createQuery<Response, Error, Key extends string | number>(
+export function createQuery<Response = any, Error = any, Key extends string | number = string | number>(
     options: QueryOptions<Response, Error, Key>
 ): CreateQueryReturn<Response, Error, Key>
-export function createQuery<Response, Error, Key extends string | number>(
+export function createQuery<Response = any, Error = any, Key extends string | number = string | number>(
     options: QueryOptions<Response, Error, Key>
 ): CreateQueryReturn<Response, Error, Key> {
     const [cache, setCache] = createSignal<Record<Key, QueryState<Response | undefined, Error>>>({} as any);
