@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@gapu/solid-query": "^0.4.5",
+    "@gapu/solid-query": "^0.4.6",
     "axios": "^1.6.0",
     "solid-js": "^1.7.8"
   },
