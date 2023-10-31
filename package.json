@@ -1,10 +1,10 @@
 {
   "name": "@gapu/solid-query",
   "version": "0.4.5",
-  "description": "Primitives for managing Rest Api integrations in Solid.js",
+  "description": "Primitives for managing rest api integrations in solid.js",
   "scripts": {
-    "build": "rollup -c",
-    "buildw": "rollup -c -w"
+    "build": "tsup --dts",
+    "build:watch": "tsup --dts --watch"
   },
   "repository": {
     "type": "git",
@@ -18,11 +18,7 @@
   "author": "Gabriel Pureliani",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^15.2.1",
-    "@rollup/plugin-terser": "^0.4.3",
-    "@rollup/plugin-typescript": "^11.1.2",
-    "@types/node": "^20.5.6",
-    "rollup": "^3.28.1",
+    "tsup": "^7.2.0",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
@@ -30,7 +26,7 @@
   },
   "module": "./dist/index.js",
   "type": "module",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "/dist"
   ]

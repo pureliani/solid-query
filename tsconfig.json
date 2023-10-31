@@ -1,17 +1,7 @@
 {
   "compilerOptions": {
-    "target": "esnext",        // Target latest ES version
-    "module": "esnext",        // Use ES modules
+    "target": "esnext",
     "moduleResolution": "node",
-    "strict": true,            // Enables all strict type checking options
-    "jsx": "preserve",            // For React projects, otherwise omit
-    "declaration": true,       // Output .d.ts declaration files
-    "emitDeclarationOnly": true,
-    "outDir": "./dist/types",        // Output directory
-    "rootDir": "./src",        // Source directory
-    "removeComments": true,    // Remove comments in the output
-    "esModuleInterop": true,   // Enables CommonJS/AMD module interoperability
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],  // Include TS and TSX files in src/
-  "exclude": ["node_modules"]
+    "strict": true,
+  }
 }
