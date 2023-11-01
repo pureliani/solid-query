@@ -4,6 +4,7 @@ export type QueryOptions<Response = any, Error = any, Key extends string | numbe
     queryFn: (key: Key) => Promise<Response>
     key: Accessor<Key>
     enabled?: () => boolean
+    onSettled?: (key: Key) => void
     onSuccess?: (key: Key, data: Response) => void
     onError?: (key: Key, error: Error) => void
 }
@@ -12,7 +13,6 @@ export type QueryState<Response = any, Error = any> = {
     data: Response | undefined
     error: Error | undefined
     isLoading: boolean
-    isLoadingInitial: boolean
 }
 
 export type CreateQueryReturn<Response = any, Error = any, Key extends string | number = string | number> = {
@@ -30,12 +30,9 @@ export type CreateQueryReturn<Response = any, Error = any, Key extends string | 
 
 export function createQuery<Response = any, Error = any, Key extends string | number = string | number>(
     options: QueryOptions<Response, Error, Key>
-): CreateQueryReturn<Response, Error, Key>
-export function createQuery<Response = any, Error = any, Key extends string | number = string | number>(
-    options: QueryOptions<Response, Error, Key>
 ): CreateQueryReturn<Response, Error, Key> {
     const [cache, setCache] = createSignal<Record<Key, QueryState<Response | undefined, Error>>>({} as any);
-    let hasLoadedInitialData = false
+    const [isLoadingInitial, setIsLoadingInitial] = createSignal(false)
 
     const enabled = () => {
         if(!options.enabled) return true
@@ -72,28 +69,28 @@ export function createQuery<Response = any, Error = any, Key extends string | nu
         if(!enabled()) return;
         try {
             batch(() => {
-                if(!hasLoadedInitialData) {
-                    setField(key, "isLoadingInitial", true)
+                if(Object.keys(cache()).length === 0) {
+                    setIsLoadingInitial(true)
                 }
                 setField(key, "isLoading", true)
             })
             const data = await options.queryFn(key);
+            options.onSuccess?.(key, data)
             setData(data, key);
             return data;
         } catch (e) {
             setError(e as Error, key);
+            options.onError?.(key, e as Error)
         } finally {
-            hasLoadedInitialData = true
             batch(() => {
                 setField(key, "isLoading", false)
-                setField(key, "isLoadingInitial", false)
+                setIsLoadingInitial(false)
             })
+            options.onSettled?.(key)
         }
     }
 
-    if(enabled()) {
-        refetch(options.key())
-    }
+    refetch(options.key())
 
     createRoot(() => {
         createEffect(() => {
@@ -111,7 +108,7 @@ export function createQuery<Response = any, Error = any, Key extends string | nu
         setError,
         refetch,
         isLoading: () => cache()[options.key()]?.isLoading ?? false,
-        isLoadingInitial: () => cache()[options.key()]?.isLoadingInitial ?? false,
+        isLoadingInitial,
         cache,
         setCache
     };

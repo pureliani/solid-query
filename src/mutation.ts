@@ -1,33 +1,32 @@
 import { createSignal, type Accessor } from "solid-js";
 
-export type MutationOptions<Arguments = any, Response = any, Error = any> = {
+export type MutationOptions<Argument = void, Response = any, Error = any> = {
     onSuccess?: (data: Response) => void
+    onSettled?: () => void
     onError?: (error: Error) => void
-    mutationFn: (args: Arguments) => Promise<Response>
+    mutationFn: (arg: Argument) => Promise<Response>
 }
 
-export type CreateMutationReturn<Arguments = any, Response = any> = {
+export type CreateMutationReturn<Argument = void, Response = any> = {
     isLoading: Accessor<boolean>,
-    mutate: (args: Arguments) => Promise<Response | undefined>
+    mutate: (arg: Argument) => Promise<Response | undefined>
 }
 
-export function createMutation<Arguments = any, Response = any, Error = any>(
-    options: MutationOptions<Arguments, Response, Error>
-): CreateMutationReturn<Arguments, Response>
-export function createMutation<Arguments = any, Response = any, Error = any>(
-    options: MutationOptions<Arguments, Response, Error>
-): CreateMutationReturn<Arguments, Response> {
+export function createMutation<Argument = void, Response = any, Error = any>(
+    options: MutationOptions<Argument, Response, Error>
+): CreateMutationReturn<Argument, Response> {
     const [isLoading, setIsLoading] = createSignal<boolean>(false);
 
-    const mutate = async (args: Arguments): Promise<Response | undefined> => {
-        setIsLoading(true);
+    const mutate = async (arg: Argument): Promise<Response | undefined> => {
         try {
-            const data = await options.mutationFn(args);
+            setIsLoading(true);
+            const data = await options.mutationFn(arg);
             options.onSuccess?.(data);
             return data;
         } catch (e) {
             options.onError?.(e as Error);
         } finally {
+            options.onSettled?.()
             setIsLoading(false);
         }
     };
