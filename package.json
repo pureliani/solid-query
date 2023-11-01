@@ -1,6 +1,6 @@
 {
   "name": "@gapu/solid-query",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Primitives for managing rest api integrations in solid.js",
   "scripts": {
     "build": "tsup --dts",
