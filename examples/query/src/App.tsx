@@ -1,7 +1,6 @@
 import { createQuery } from '@gapu/solid-query';
 import axios from 'axios';
 import { Show, createSignal } from 'solid-js';
-import { LoadingScreen } from './components/LoadingScreen';
 import { LoadingDots } from './components/LoadingDots';
 import { ErrorScreen } from './components/ErrorScreen';
 
@@ -20,15 +19,13 @@ export const {
   error,
   isError,
   isLoading,
-  setData,
   setEntry,
   refetch,
   cache,
   setCache,
-  setError,
 } = createQuery({
   key: () => postId(),
-  enabled: ()=> isEnabled(),
+  enabled: () => isEnabled(),
   queryFn: async (key) => {
     const { data: post } = await axios.get<QueryResponse>(
       `https://jsonplaceholder.typicode.com/posts/${key}`
@@ -43,15 +40,14 @@ const onToggle = () => setIsEnabled((current) => !current)
 const onRefetchSecond = () => refetch(2);
 const onClearCache = () => setCache({});
 const onUpdateThird = () =>
-  setData(
-    {
-      id: 44,
-      body: 'hello',
-      title: '2',
-      userId: 9,
-    },
-    3
-  );
+  setEntry({
+    data: {
+      id: 1000,
+      body: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ratione quas voluptate similique ducimus tempora, vel odit! Debitis sequi enim numquam?',
+      title: 'Lorem ipsum dolor',
+      userId: 1,
+    }
+  }, 3);
 
 const ActionButtons = () => {
   return (
@@ -127,10 +123,10 @@ export default function Home() {
             <span>Body: </span>
             <span>{data()?.body}</span>
           </li>
-          <Show when={isLoading()}>
-            <LoadingDots />
-          </Show>
         </div>
+      </Show>
+      <Show when={isLoading()}>
+        <LoadingDots />
       </Show>
     </div>
   );
