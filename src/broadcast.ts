@@ -18,9 +18,6 @@ export type BroadcastQueryMessage<Response = any, Error = any, Key extends strin
 
 export function broadcastQuery<Response = any, Error = any, Key extends string | number = string | number>(
     props: BroadcastQueryProps<Response, Error, Key>
-): void
-export function broadcastQuery<Response = any, Error = any, Key extends string | number = string | number>(
-    props: BroadcastQueryProps<Response, Error, Key>
 ): void {
     props.initialize ??= true
     let isInternalUpdate = false;

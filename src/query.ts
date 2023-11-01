@@ -16,11 +16,10 @@ export type QueryState<Response = any, Error = any> = {
 }
 
 export type CreateQueryReturn<Response = any, Error = any, Key extends string | number = string | number> = {
-    data: Accessor<Response | undefined>
-    error: Accessor<Error | undefined>
-    isError: Accessor<boolean>
-    isLoading: Accessor<boolean>
-    isLoadingInitial: Accessor<boolean>
+    data: (key?: Key) => Response | undefined
+    error: (key?: Key) =>  Error | undefined
+    isError: (key?: Key) => boolean
+    isLoading: (key?: Key) => boolean
     setError: (error: Error, key?: Key) => void
     setData: (data: Response, key?: Key) => void
     refetch: (key?: Key) => Promise<Response | undefined>
@@ -32,7 +31,6 @@ export function createQuery<Response = any, Error = any, Key extends string | nu
     options: QueryOptions<Response, Error, Key>
 ): CreateQueryReturn<Response, Error, Key> {
     const [cache, setCache] = createSignal<Record<Key, QueryState<Response | undefined, Error>>>({} as any);
-    const [isLoadingInitial, setIsLoadingInitial] = createSignal(false)
 
     const enabled = () => {
         if(!options.enabled) return true
@@ -68,12 +66,7 @@ export function createQuery<Response = any, Error = any, Key extends string | nu
     const refetch = async (key = options.key()): Promise<Response | undefined> => {
         if(!enabled()) return;
         try {
-            batch(() => {
-                if(Object.keys(cache()).length === 0) {
-                    setIsLoadingInitial(true)
-                }
-                setField(key, "isLoading", true)
-            })
+            setField(key, "isLoading", true)
             const data = await options.queryFn(key);
             options.onSuccess?.(key, data)
             setData(data, key);
@@ -82,10 +75,7 @@ export function createQuery<Response = any, Error = any, Key extends string | nu
             setError(e as Error, key);
             options.onError?.(key, e as Error)
         } finally {
-            batch(() => {
-                setField(key, "isLoading", false)
-                setIsLoadingInitial(false)
-            })
+            setField(key, "isLoading", false)
             options.onSettled?.(key)
         }
     }
@@ -101,14 +91,13 @@ export function createQuery<Response = any, Error = any, Key extends string | nu
     })
 
     return {
-        data: () => cache()[options.key()]?.data ?? undefined,
+        data: (key = options.key()) => cache()[key]?.data ?? undefined,
         setData,
-        error: () => cache()[options.key()]?.error ?? undefined,
-        isError: () => cache()[options.key()]?.error !== undefined,
+        error: (key = options.key()) => cache()[key]?.error ?? undefined,
+        isError: (key = options.key()) => cache()[key]?.error !== undefined,
         setError,
         refetch,
-        isLoading: () => cache()[options.key()]?.isLoading ?? false,
-        isLoadingInitial,
+        isLoading: (key = options.key()) => cache()[key]?.isLoading ?? false,
         cache,
         setCache
     };
