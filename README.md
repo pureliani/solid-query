@@ -135,8 +135,12 @@ export type QueryOptions<Response = any, Error = any, Key extends string | numbe
 }
 
 export type QueryState<Response = any, Error = any> = {
-    data: Response | undefined
-    error: Error | undefined
+    data: null
+    error: Error
+    isLoading: boolean
+} | {
+    data: Response
+    error: null
     isLoading: boolean
 }
 
@@ -144,6 +148,7 @@ export type CreateQueryReturn<Response = any, Error = any, Key extends string | 
     data: (key?: Key) => Response | undefined
     error: (key?: Key) =>  Error | undefined
     isError: (key?: Key) => boolean
+    setEntry: <Merge extends boolean, Entry extends Merge extends true ? Partial<QueryState<Response, Error>> : QueryState<Response, Error>>(key: Key, entry: Entry, merge?: Merge) => void
     isLoading: (key?: Key) => boolean
     setError: (error: Error, key?: Key) => void
     setData: (data: Response, key?: Key) => void
