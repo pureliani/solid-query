@@ -100,7 +100,7 @@ export function createQuery<Response = any, Error = any, Key extends string | nu
         setData,
         setEntry,
         error: (key = options.key()) => cache()[key]?.error ?? undefined,
-        isError: (key = options.key()) => cache()[key]?.error !== undefined,
+        isError: (key = options.key()) => cache()[key]?.error !== null,
         setError,
         refetch,
         isLoading: (key = options.key()) => cache()[key]?.isLoading ?? false,

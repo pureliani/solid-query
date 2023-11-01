@@ -1,4 +1,4 @@
-import { createQuery, broadcastQuery } from '@gapu/solid-query';
+import { createQuery } from '@gapu/solid-query';
 import axios from 'axios';
 import { Show, createSignal } from 'solid-js';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -21,7 +21,7 @@ export const {
   isError,
   isLoading,
   setData,
-  isLoadingInitial,
+  setEntry,
   refetch,
   cache,
   setCache,
@@ -35,12 +35,6 @@ export const {
     );
     return post;
   },
-});
-
-broadcastQuery({
-  cache,
-  setCache,
-  channel: 'posts-query-channel',
 });
 
 const onNext = () => setPostId((current) => current + 1);
@@ -111,14 +105,11 @@ const ActionButtons = () => {
 export default function Home() {
   return (
     <div class="max-w-md mx-auto mt-8">
-      <Show when={isLoadingInitial()}>
-        <LoadingScreen />
-      </Show>
       <Show when={isError()}>
         <ErrorScreen />
       </Show>
       <ActionButtons />
-      <Show when={!isLoadingInitial() && !isError()}>
+      <Show when={!isLoading() && !isError()}>
         <div class="flex flex-col items-start gap-4">
           <li>
             <span>Post ID: </span>
