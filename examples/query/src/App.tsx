@@ -21,8 +21,7 @@ export const {
   isLoading,
   setEntry,
   refetch,
-  cache,
-  setCache,
+  emptyCache,
 } = createQuery({
   key: () => postId(),
   enabled: () => isEnabled(),
@@ -38,14 +37,13 @@ const onNext = () => setPostId((current) => current + 1);
 const onPrev = () => setPostId((current) => current - 1);
 const onToggle = () => setIsEnabled((current) => !current)
 const onRefetchSecond = () => refetch(2);
-const onClearCache = () => setCache({});
 const onUpdateThird = () =>
   setEntry({
     data: {
       id: 1000,
       body: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ratione quas voluptate similique ducimus tempora, vel odit! Debitis sequi enim numquam?',
       title: 'Lorem ipsum dolor',
-      userId: 1,
+      userId: 1
     }
   }, 3);
 
@@ -90,9 +88,9 @@ const ActionButtons = () => {
       </button>
       <button
         class="px-6 py-2 border rounded hover:bg-gray-200"
-        onClick={onClearCache}
+        onClick={emptyCache}
       >
-        Clear Cache
+        Empty Cache
       </button>
     </div>
   );

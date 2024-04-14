@@ -13,20 +13,34 @@ Exported functions
 - [createMutation](#createmutation)
 - [broadcastQuery](#broadcastquery)
 
+### [See the usage example](https://stackblitz.com/edit/gapu-solid-query?file=src%2FApp.tsx)
 
-## Usage
-#### [Checkout the demo](https://stackblitz.com/edit/gapu-solid-query?file=src%2FApp.tsx)
+### createQuery
+A key is a function which returns: an object, a set, a map or a primitive type like string, number, null, etc.. 
+The ordering of parameters does not matter if the key is an object, a set or a map, but it does for arrays, e.g:
+
+|Structure A                     |Structure B                    |Are equal|
+|--------------------------------|-------------------------------|---------|
+|`{ a: 1, b: 2 }`                |`{ b: 1, a: 2 }`               |true     |
+|`[1, 2, 3]`                     |`[1, 3, 2]`                    |false    |
+|`new Set([1, 2])`               |`new Set([2, 1])`              |true     |
+|`new Set([1, 2])`               |`new Set([2, 1, 3])`           |false    |
+|`new Map([[1, 2], [3, 4]]))`    |`new Map([[1, 2], [3, 4]])`    |true     |
+|`new Map([[1, 2], [3, 4]]))`    |`new Map([[1, 2], [3, 4, 5]])` |false    |
+|`"A"`                           |`"A"`                          |true     |
+|`"A"`                           |`"a"`                          |false    |
+|`1`                             |`1`                            |true     |
+|`1`                             |`1.2`                          |false    |
+|`new Date('2024-01-01')`        |`new Date('2024-01-01')`       |true     |
+|`new Date('2024-01-01')`        |`new Date('2024-01-02')`       |false    |
 
 > **Warning**  
 > Do not consume a signal of a key directly in the queryFn, instead take the key as an argument as shown in the example
 
-### createQuery
 ```tsx
-import { createQuery } from '@gapu/solid-query';
 import axios from 'axios';
-import { Show, createSignal } from 'solid-js';
-import { LoadingDots } from './components/LoadingDots';
-import { ErrorScreen } from './components/ErrorScreen';
+import { createQuery } from '@gapu/solid-query';
+import { createSignal } from 'solid-js';
 
 type QueryResponse = {
   id: number;
@@ -45,8 +59,7 @@ export const {
   isLoading,
   setEntry,
   refetch,
-  cache,
-  setCache,
+  emptyCache,
 } = createQuery({
   key: () => postId(),
   enabled: () => isEnabled(),
@@ -58,102 +71,19 @@ export const {
   },
 });
 
-const onNext = () => setPostId((current) => current + 1);
-const onPrev = () => setPostId((current) => current - 1);
-const onToggle = () => setIsEnabled((current) => !current)
+const onNext = () => setPostId((currentId) => currentId + 1);
+const onPrev = () => setPostId((currentId) => currentId - 1);
+const onToggle = () => setIsEnabled((enabled) => !enabled)
 const onRefetchSecond = () => refetch(2);
-const onClearCache = () => setCache({});
-const onUpdateThird = () =>
+const onUpdateThird = () => {
   setEntry({
     data: {
       id: 1000,
       body: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ratione quas voluptate similique ducimus tempora, vel odit! Debitis sequi enim numquam?',
       title: 'Lorem ipsum dolor',
-      userId: 1,
+      userId: 1
     }
   }, 3);
-
-const ActionButtons = () => {
-  return (
-    <div class="flex items-center gap-2 my-2 flex-wrap">
-      <button
-        class="px-6 py-2 border rounded hover:bg-gray-200"
-        onClick={onPrev}
-      >
-        Prev
-      </button>
-      <button
-        class="px-6 py-2 border rounded hover:bg-gray-200"
-        onClick={onNext}
-      >
-        Next
-      </button>
-      <button
-        class="px-6 py-2 border rounded hover:bg-gray-200"
-        onClick={() => refetch()}
-      >
-        Refresh
-      </button>
-      <button
-        class="px-6 py-2 border rounded hover:bg-gray-200"
-        onClick={onRefetchSecond}
-      >
-        Refetch 2nd
-      </button>
-      <button
-        class="px-6 py-2 border rounded hover:bg-gray-200"
-        onClick={onUpdateThird}
-      >
-        Update 3rd
-      </button>
-      <button
-        class="px-6 py-2 border rounded hover:bg-gray-200"
-        onClick={onToggle}
-      >
-        Toggle
-      </button>
-      <button
-        class="px-6 py-2 border rounded hover:bg-gray-200"
-        onClick={onClearCache}
-      >
-        Clear Cache
-      </button>
-    </div>
-  );
-};
-
-export default function Home() {
-  return (
-    <div class="max-w-md mx-auto mt-8">
-      <Show when={isError()}>
-        <ErrorScreen />
-      </Show>
-      <ActionButtons />
-      <Show when={!isLoading() && !isError()}>
-        <div class="flex flex-col items-start gap-4">
-          <li>
-            <span>Post ID: </span>
-            <span>{data()?.id}</span>
-          </li>
-          <li>
-            <span>User ID: </span>
-            <span>{data()?.userId}</span>
-          </li>
-          <li>
-            <span>Title: </span>
-            <span>{data()?.title}</span>
-          </li>
-          <li>
-            <span>Body: </span>
-            <span>{data()?.body}</span>
-          </li>
-        </div>
-      </Show>
-      <Show when={isLoading()}>
-        <LoadingDots />
-      </Show>
-    </div>
-  );
 }
 ```
 
@@ -176,7 +106,7 @@ type ResponseBody = {
     userId: number
 }
 
-export const { isLoading, mutate } = createMutation<RequestBody, ResponseBody>({
+export const { isLoading, mutate: createPost } = createMutation<RequestBody, ResponseBody>({
     mutationFn: async (body) => {
         const { data } = await axios.post("https://jsonplaceholder.typicode.com/posts", body);
         return data;
@@ -187,126 +117,71 @@ export const { isLoading, mutate } = createMutation<RequestBody, ResponseBody>({
 });
 
 // Mutation example
-mutate({
+createPost({
     userId: 1,
     title: "Hello",
     body: "World",
 });
 ```
 
-### broadcastQuery
-Used to share query cache to other browser instances via [BroadcastChannel - Web API](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel) to avoid refetching data if the other tabs / windows already have that query cache entry
-```ts
-import { createQuery, broadcastQuery } from "@gapu/solid-query"
-import axios from "axios"
-import { createSignal } from "solid-js"
-
-type QueryResponse = {
-    id: number
-    title: string
-    body: string
-    userId: number
-}
-const [postId, setPostId] = createSignal(1)
-
-export const { cache, setCache } = createQuery({
-    key: () => postId(),
-    queryFn: async (key) => {
-        const { data: post } = await axios.get<QueryResponse>(`https://jsonplaceholder.typicode.com/posts/${key}`);
-        return post;
-    }
-});
-
-broadcastQuery({
-    cache,
-    setCache,
-    channel: 'posts-query-channel',
-})
-```
-
 ## Type definitions
-
-### createQuery
 ```ts
-import { type Accessor, type Setter } from "solid-js";
+import { Accessor } from 'solid-js';
+import { NotUndefined } from 'object-hash';
 
-export type QueryOptions<Response = any, Error = any, Key extends string | number = string | number> = {
-    queryFn: (key: Key) => Promise<Response>
-    key: Accessor<Key>
-    enabled?: () => boolean
-    onSettled?: (key: Key) => void
-    onSuccess?: (key: Key, data: Response) => void
-    onError?: (key: Key, error: Error) => void
-}
+type MutationOptions<Argument = void, Response = any, Error = any> = {
+    onSuccess?: (data: Response) => void;
+    onSettled?: () => void;
+    onError?: (error: Error) => void;
+    mutationFn: (arg: Argument) => Promise<Response>;
+};
+type CreateMutationReturn<Argument = void, Response = any> = {
+    isLoading: Accessor<boolean>;
+    mutate: (arg: Argument) => Promise<Response | undefined>;
+};
+declare function createMutation<
+  Argument = void, 
+  Response = any, 
+  Error = any
+>(options: MutationOptions<Argument, Response, Error>): CreateMutationReturn<Argument, Response>;
 
-export type QueryState<Response = any, Error = any> = {
-    data: Response
-    error: undefined
-    isLoading: boolean
-} | {
-    data: undefined
-    error: Error
-    isLoading: boolean
-}
+type QueryOptions<Response = any, Error = any, Key extends NotUndefined = any> = {
+    key: Accessor<Key>;
+    enabled?: () => boolean;
+    queryFn: (key: Key) => Promise<Response>;
+    onSettled?: (key: Key) => void;
+    onSuccess?: (key: Key, data: Response) => void;
+    onError?: (key: Key, error: Error) => void;
+};
+type QueryState<Response = any, Error = any> = {
+    isLoading?: boolean;
+    data?: Response;
+    error?: Error;
+};
+type Update<T> = T | ((arg: T) => T);
+type CreateQueryReturn<Response = any, Error = any, Key extends NotUndefined = any> = {
+    data: (key?: Key) => Response | undefined;
+    error: (key?: Key) => Error | undefined;
+    isError: (key?: Key) => boolean;
+    isLoading: (key?: Key) => boolean;
+    setEntry: (update: Update<QueryState<Response, Error>>, key?: Key) => void;
+    refetch: (key?: Key) => Promise<Response | undefined>;
+    emptyCache: () => void;
+};
+declare function createQuery<
+  Response = any, 
+  Error = any, 
+  Key extends NotUndefined = any
+>(options: QueryOptions<Response, Error, Key>): CreateQueryReturn<Response, Error, Key>;
 
-export type Update<T> = T | ((arg: T) => T)
-export type CreateQueryReturn<Response = any, Error = any, Key extends string | number = string | number> = {
-    data: (key?: Key) => Response | undefined
-    error: (key?: Key) =>  Error | undefined
-    isError: (key?: Key) => boolean
-    isLoading: (key?: Key) => boolean
-    setEntry: (update: Update<Partial<QueryState<Response, Error>>>, key?: Key) => void
-    refetch: (key?: Key) => Promise<Response | undefined>
-    cache: Accessor<Record<Key, QueryState<Response, Error>>>
-    setCache: Setter<Record<Key, QueryState<Response, Error>>>
-}
-
-export function createQuery<Response = any, Error = any, Key extends string | number = string | number>(
-    options: QueryOptions<Response, Error, Key>
-): CreateQueryReturn<Response, Error, Key>
-```
-
-### createMutation
-```ts
-import { type Accessor } from "solid-js";
-
-export type MutationOptions<Argument = void, Response = any, Error = any> = {
-    onSuccess?: (data: Response) => void
-    onSettled?: () => void
-    onError?: (error: Error) => void
-    mutationFn: (arg: Argument) => Promise<Response>
-}
-
-export type CreateMutationReturn<Argument = void, Response = any> = {
-    isLoading: Accessor<boolean>,
-    mutate: (arg: Argument) => Promise<Response | undefined>
-}
-
-export function createMutation<Argument = void, Response = any, Error = any>(
-    options: MutationOptions<Argument, Response, Error>
-): CreateMutationReturn<Argument, Response>
-```
-
-### broadcastQuery
-```ts
-import type { Accessor, Setter } from "solid-js"
-import type { QueryState } from "./query"
-
-export type BroadcastQueryProps<Response = any, Error = any, Key extends string | number = string | number> = {
-    channel: string
-    initialize?: boolean
-    cache: Accessor<Record<Key, QueryState<Response | undefined, Error>>>
-    setCache: Setter<Record<Key, QueryState<Response | undefined, Error>>>
-}
-
-export type BroadcastQueryMessage<Response = any, Error = any, Key extends string | number = string | number> = {
-    type: "SET"
-    value: Record<Key, QueryState<Response | undefined, Error>>
-} | {
-    type: "GET"
-}
-
-export function broadcastQuery<Response = any, Error = any, Key extends string | number = string | number>(
-    props: BroadcastQueryProps<Response, Error, Key>
-): void 
+export { 
+  CreateMutationReturn, 
+  CreateQueryReturn, 
+  MutationOptions, 
+  QueryOptions, 
+  QueryState, 
+  Update, 
+  createMutation, 
+  createQuery 
+};
 ```
