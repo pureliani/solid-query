@@ -1,4 +1,4 @@
-## Primitives for managing rest api integrations in solid.js
+## Primitives for managing queries and cache in solid.js
 [![npm (scoped)](https://img.shields.io/npm/v/%40gapu/solid-query)](https://www.npmjs.com/package/@gapu/solid-query)
 [![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40gapu/solid-query)](https://bundlephobia.com/package/@gapu/solid-query)
 [![NPM](https://img.shields.io/npm/l/%40gapu%2Fsolid-query)](https://www.npmjs.com/package/@gapu/solid-query)
